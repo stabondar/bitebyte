@@ -20,7 +20,8 @@ export function ScreenshotAnalyzer() {
   const [currentRecord, setCurrentRecord] = useState<AnalysisRecord | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [analysisType, setAnalysisType] = useState<string>("food")
+  // Always use "food" as the analysis type
+  const analysisType = "food"
   const [history, setHistory] = useState<AnalysisRecord[]>([])
   const [activeTab, setActiveTab] = useState("upload")
   const [isLoading, setIsLoading] = useState(false)
@@ -92,7 +93,7 @@ export function ScreenshotAnalyzer() {
       setIsAnalyzing(true)
       setError(null)
 
-      const record = await analyzeScreenshot(file, analysisType)
+      const record = await analyzeScreenshot(file)
       setCurrentRecord(record)
 
       // If the record has an imageUrl, use it for the image preview
@@ -146,20 +147,7 @@ export function ScreenshotAnalyzer() {
       )}
 
       <Card className="w-full">
-        <CardHeader>
-          <CardTitle>BiteByte Food Analyzer</CardTitle>
-        </CardHeader>
         <CardContent className="space-y-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="upload">Upload</TabsTrigger>
-              <TabsTrigger value="history">
-                <History className="mr-2 h-4 w-4" />
-                History
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="upload" className="space-y-4">
               <div className="flex items-center justify-center w-full">
                 <label
                   htmlFor="screenshot-upload"
@@ -205,76 +193,6 @@ export function ScreenshotAnalyzer() {
                   Take Photo
                 </Button>
               </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Analysis Type</label>
-                <Select value={analysisType} onValueChange={setAnalysisType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select analysis type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="food">Food Analysis</SelectItem>
-                    <SelectItem value="ui">UI/UX Analysis</SelectItem>
-                    <SelectItem value="security">Security Check</SelectItem>
-                    <SelectItem value="accessibility">Accessibility Review</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="history">
-              {isLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : history.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {history.map((record) => (
-                    <div
-                      key={record.id}
-                      className={`relative cursor-pointer border rounded-md overflow-hidden ${
-                        currentRecord?.id === record.id ? "ring-2 ring-primary" : ""
-                      }`}
-                      onClick={() => handleHistoryItemClick(record)}
-                    >
-                      <div className="relative h-32 w-full">
-                        <Image
-                          src={record.imageUrl || "/placeholder.svg"}
-                          alt={`Analysis from ${new Date(record.timestamp).toLocaleString()}`}
-                          fill
-                          className="object-cover"
-                          unoptimized // Add this to handle blob URLs
-                        />
-                      </div>
-                      <div className="p-2 text-xs">
-                        <div className="font-medium">
-                          {record.analysisType.charAt(0).toUpperCase() + record.analysisType.slice(1)}
-                        </div>
-                        <div className="text-muted-foreground">
-                          {formatDistanceToNow(new Date(record.timestamp), { addSuffix: true })}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute top-1 right-1 h-6 w-6 bg-black/50 hover:bg-black/70"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDelete(record.id)
-                          }}
-                        >
-                          <Trash2 className="h-3 w-3 text-white" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  No analysis history yet. Upload a food photo to get started.
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
 
           {error && <div className="p-3 text-sm text-red-500 bg-red-100/30 rounded-md">{error}</div>}
 

@@ -5,43 +5,23 @@ import { openai } from "@ai-sdk/openai"
 import { storeScreenshot } from "@/lib/storage"
 import type { AnalysisRecord } from "@/types"
 
-export async function analyzeScreenshot(file: File, analysisType = "food"): Promise<AnalysisRecord> {
+export async function analyzeScreenshot(file: File): Promise<AnalysisRecord> {
+  // Always use "food" as the analysis type
+  const analysisType = "food";
   try {
     // Convert file to buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Create prompt based on analysis type
-    let prompt = ""
+    // Create prompt for food analysis
+    const prompt = `
+    Analyze the food in this image and provide ONLY the following information in a concise format:
+    1. What is this dish/food? (1-2 sentence description)
+    2. Approximate weight (in grams)
+    3. Total calories count
 
-    switch (analysisType) {
-      case "food":
-        prompt = `
-        Analyze the food in this image and provide the following information:
-        1. Identify all food items visible in the image
-        2. Estimate the total calories for the entire meal
-        3. Break down calories by each food item
-        4. Estimate macronutrients (protein, carbs, fat) when possible
-        5. Note any potential allergens present
-        6. Suggest healthier alternatives if applicable
-
-        Format your response in a clear, easy-to-read structure.
-        `
-        break
-      case "ui":
-        prompt = "Focus on UI/UX elements, design patterns, and potential improvements to the interface."
-        break
-      case "security":
-        prompt = "Look for potential security issues, sensitive information displayed, or privacy concerns."
-        break
-      case "accessibility":
-        prompt =
-          "Evaluate accessibility features, potential barriers, and suggest improvements for users with disabilities."
-        break
-      default:
-        prompt =
-          "Describe what you see, identify any food items, and provide any relevant nutritional insights."
-    }
+    Keep your response brief and to-the-point, without additional information.
+    `
 
     console.log(`Starting ${analysisType} analysis with model: gpt-4o`)
 
