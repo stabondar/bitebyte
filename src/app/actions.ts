@@ -12,25 +12,38 @@ export async function analyzeScreenshot(file: File, analysisType = "food"): Prom
     const buffer = Buffer.from(bytes)
 
     // Create prompt based on analysis type
-    let prompt = "Analyze the following screenshot and count the calories based on the visible food items. "
+    let prompt = ""
 
     switch (analysisType) {
+      case "food":
+        prompt = `
+        Analyze the food in this image and provide the following information:
+        1. Identify all food items visible in the image
+        2. Estimate the total calories for the entire meal
+        3. Break down calories by each food item
+        4. Estimate macronutrients (protein, carbs, fat) when possible
+        5. Note any potential allergens present
+        6. Suggest healthier alternatives if applicable
+
+        Format your response in a clear, easy-to-read structure.
+        `
+        break
       case "ui":
-        prompt += "Focus on UI/UX elements, design patterns, and potential improvements to the interface."
+        prompt = "Focus on UI/UX elements, design patterns, and potential improvements to the interface."
         break
       case "security":
-        prompt += "Look for potential security issues, sensitive information displayed, or privacy concerns."
+        prompt = "Look for potential security issues, sensitive information displayed, or privacy concerns."
         break
       case "accessibility":
-        prompt +=
+        prompt =
           "Evaluate accessibility features, potential barriers, and suggest improvements for users with disabilities."
         break
       default:
-        prompt +=
-          "Describe what you see, identify any apps, UI elements, and provide any relevant insights about what the user might be doing."
+        prompt =
+          "Describe what you see, identify any food items, and provide any relevant nutritional insights."
     }
 
-    console.log("Starting analysis with model: gpt-4o")
+    console.log(`Starting ${analysisType} analysis with model: gpt-4o`)
 
     // Generate analysis using OpenAI's vision capabilities with gpt-4o model
     const { text } = await generateText({
